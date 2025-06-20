@@ -9,7 +9,7 @@ yarn-error.log*
 # Environment variables
 .env
 .env.*
-!.env.example # If you plan to have an example .env file for structure
+!.env.example
 
 # Build artifacts
 dist/
@@ -17,26 +17,30 @@ build/
 coverage/
 
 # Playwright
-test-results/  # Playwright default test results directory
-playwright/.cache/ # Playwright's internal cache
-videos/        # Playwright video recordings (if not in test-results/)
-screenshots/   # Playwright screenshots (if not in test-results/)
+test-results/
+playwright/.cache
+videos/
+screenshots/
 
 # Allure Report
-allure-results/ # Raw Allure results
-allure-report/  # Generated Allure HTML report
+allure-results
+allure-report
 
 # Project specific artifacts from your screenshots
-playwright-report/ # Based on your screenshot, this folder also seems to be generated
+playwright-report
 
 # Editor and IDE-specific files
-.idea/ # IntelliJ IDEA
-.vscode/ # VS Code (specific settings, if you don't want to share all)
-*.swp # Vim swap files
-*.bak # Backup files
-*.log # Log files
-.DS_Store # macOS specific
-Thumbs.db # Windows specific
+.idea
+.vscode
+*.swp
+*.bak
+*.log
+.DS_Store
+Thumbs.db
 
 # Zipped source files (from your screenshot)
 *.zip
+
+# Custom additions for detected unwanted files
+npx
+git

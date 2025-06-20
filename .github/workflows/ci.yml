@@ -1,0 +1,86 @@
+name: Playwright Cucumber.js CI/CD
+
+on:
+  push:
+    branches:
+      - master # Changed from 'main' to 'master' to match your repo's default branch
+  pull_request:
+    branches:
+      - master # Changed from 'main' to 'master' to match your repo's default branch
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your preferred Node.js version, ensure it's compatible with your project
+
+      - name: Cache Node.js modules
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Set up Allure Commandline
+        run: npm install -g allure-commandline
+
+      - name: Run all tests and generate Allure report
+        run: npm run test-all:allure
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          APP_USERNAME: ${{ secrets.APP_USERNAME }}
+          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+
+      - name: Upload Allure results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          retention-days: 5
+
+      - name: Generate Allure Report
+        run: npm run allure:generate
+
+      - name: Upload Allure Report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 30
+
+  deploy-allure-report:
+    if: github.ref == 'refs/heads/master' # Changed from 'main' to 'master' for deployment condition
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Allure Report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+          force_orphan: true # Recommended for clean deployments
