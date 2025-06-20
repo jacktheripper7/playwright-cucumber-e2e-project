@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# Environment variables
+.env
+.env.*
+!.env.example # If you plan to have an example .env file for structure
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Playwright
+test-results/  # Playwright default test results directory
+playwright/.cache/ # Playwright's internal cache
+videos/        # Playwright video recordings (if not in test-results/)
+screenshots/   # Playwright screenshots (if not in test-results/)
+
+# Allure Report
+allure-results/ # Raw Allure results
+allure-report/  # Generated Allure HTML report
+
+# Project specific artifacts from your screenshots
+playwright-report/ # Based on your screenshot, this folder also seems to be generated
+
+# Editor and IDE-specific files
+.idea/ # IntelliJ IDEA
+.vscode/ # VS Code (specific settings, if you don't want to share all)
+*.swp # Vim swap files
+*.bak # Backup files
+*.log # Log files
+.DS_Store # macOS specific
+Thumbs.db # Windows specific
+
+# Zipped source files (from your screenshot)
+*.zip
