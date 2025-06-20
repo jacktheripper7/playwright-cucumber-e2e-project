@@ -3,10 +3,10 @@ name: Playwright Cucumber.js CI/CD
 on:
   push:
     branches:
-      - master # Changed from 'main' to 'master' to match your repo's default branch
+      - master
   pull_request:
     branches:
-      - master # Changed from 'main' to 'master' to match your repo's default branch
+      - master
 
 jobs:
   build-and-test:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your preferred Node.js version, ensure it's compatible with your project
+          node-version: '20'
 
       - name: Cache Node.js modules
         id: cache-npm
@@ -39,27 +39,17 @@ jobs:
       - name: Set up Allure Commandline
         run: npm install -g allure-commandline
 
-      # New step: Ensure ts-node is available if cucumber.js relies on global ts-node
-      # Although npm ci should handle it, this provides an extra layer if there's a PATH issue
-      - name: Install ts-node globally (if needed)
-        run: npm install -g ts-node
-        continue-on-error: true # Allow job to continue even if this fails, as it might already be there
-
       - name: Clean allure directories
         run: rm -rf allure-results allure-report
         continue-on-error: true
 
       - name: Run all tests and generate Allure report
-        # We will directly run cucumber-js here for more direct control and output
-        # Also, using '|| true' to ensure the step itself doesn't fail due to test failures,
-        # so we can still get artifacts for debugging even if tests fail.
-        run: |
-          npx cucumber-js --format allure-cucumberjs/reporter --fail-fast || true
-          npm run allure:generate
+        run: npm run test-all:allure
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
           APP_USERNAME: ${{ secrets.APP_USERNAME }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        continue-on-error: true
 
       - name: Upload Allure results as artifact
         uses: actions/upload-artifact@v4
@@ -68,7 +58,7 @@ jobs:
           path: allure-results
           retention-days: 5
 
-      - name: Generate Allure Report (redundant if generated above, but keeping for safety)
+      - name: Generate Allure Report
         run: npm run allure:generate
 
       - name: Upload Allure Report as artifact
@@ -79,9 +69,11 @@ jobs:
           retention-days: 30
 
   deploy-allure-report:
-    if: github.ref == 'refs/heads/master' # Changed from 'main' to 'master' for deployment condition
+    if: github.ref == 'refs/heads/master'
     needs: build-and-test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # This line grants write access to repository contents
 
     steps:
       - name: Checkout repository
@@ -98,4 +90,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-report
-          force_orphan: true # Recommended for clean deployments
+          force_orphan: true
