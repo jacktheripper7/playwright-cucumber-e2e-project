@@ -39,6 +39,10 @@ jobs:
       - name: Set up Allure Commandline
         run: npm install -g allure-commandline
 
+      - name: Clean allure directories
+        run: rm -rf allure-results allure-report
+        continue-on-error: true
+
       - name: Run all tests and generate Allure report
         run: npm run test-all:allure
         env:
