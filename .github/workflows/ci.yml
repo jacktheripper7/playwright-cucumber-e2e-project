@@ -73,7 +73,9 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     permissions:
-      contents: write # This line grants write access to repository contents
+      contents: write
+      pages: write # Add this permission for publishing pages
+      id-token: write # Needed for trusted publishing to GitHub Pages
 
     steps:
       - name: Checkout repository
@@ -85,9 +87,14 @@ jobs:
           name: allure-report
           path: allure-report
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: allure-report
-          force_orphan: true
+          path: 'allure-report'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
